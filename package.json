@@ -1,0 +1,22 @@
+{
+  "name": "tetris-train",
+  "version": "1.0.0",
+  "description": "A mobile Tetris game where a train rides over rails laid on Tetris blocks",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "serve-simple": "python3 -m http.server 8000",
+    "network-info": "node -e \"console.log('Network Interfaces:'); const os = require('os'); const nets = os.networkInterfaces(); Object.keys(nets).forEach(name => { nets[name].forEach(net => { if (net.family === 'IPv4' && !net.internal) console.log(name + ': ' + net.address) }) })\""
+  },
+  "keywords": ["tetris", "train", "mobile", "game", "phaser"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+} 

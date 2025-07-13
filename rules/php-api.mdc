@@ -1,0 +1,87 @@
+# PHP API Development Guidelines
+
+## Code Style and Structure
+- Follow PSR-12 coding standards for consistent formatting
+- Use meaningful variable and function names
+- Implement proper namespace organization
+- Keep functions small and focused on single responsibilities
+- Use type declarations for function parameters and return types
+
+## Error Handling
+- Implement proper exception handling with try-catch blocks
+- Use appropriate HTTP status codes for different scenarios
+- Return consistent error response formats
+- Log errors appropriately for debugging
+- Never expose sensitive information in error messages
+
+## Security Best Practices
+- Validate and sanitize all input data
+- Use prepared statements for database queries
+- Implement proper authentication and authorization
+- Use HTTPS for all API communications
+- Implement rate limiting to prevent abuse
+- Sanitize output to prevent XSS attacks
+
+## API Design
+- Follow RESTful principles for endpoint design
+- Use appropriate HTTP methods (GET, POST, PUT, DELETE)
+- Implement consistent response formats (JSON)
+- Include proper API versioning strategy
+- Provide clear and descriptive endpoint documentation
+
+## Performance Optimization
+- Use efficient database queries with proper indexing
+- Implement caching strategies for frequently accessed data
+- Minimize memory usage and avoid memory leaks
+- Use appropriate data structures for different use cases
+- Profile and optimize slow-performing code
+
+## Data Validation
+- Validate input data types and formats
+- Implement proper data sanitization
+- Use whitelist validation where possible
+- Provide clear validation error messages
+- Validate file uploads properly (type, size, content)
+
+## Database Interactions
+- Use prepared statements to prevent SQL injection
+- Implement proper connection pooling
+- Use transactions for related database operations
+- Optimize database queries for performance
+- Implement proper database error handling
+
+## JSON Response Handling
+- Always return valid JSON responses
+- Use consistent response structure across endpoints
+- Include appropriate metadata (status, message, data)
+- Handle JSON encoding/decoding errors gracefully
+- Implement proper content-type headers
+
+## File Handling
+- Validate file uploads thoroughly
+- Implement proper file storage organization
+- Use secure file naming conventions
+- Implement file size and type restrictions
+- Handle file processing errors gracefully
+
+## Testing and Quality Assurance
+- Write unit tests for critical functionality
+- Implement integration tests for API endpoints
+- Use code analysis tools for quality checking
+- Validate API responses against schemas
+- Test error handling scenarios thoroughly
+
+## Documentation
+- Document all API endpoints with examples
+- Include request/response formats
+- Document authentication requirements
+- Provide error code explanations
+- Keep documentation up-to-date with code changes
+
+## Monitoring and Logging
+- Implement proper logging for debugging and monitoring
+- Log API usage and performance metrics
+- Monitor error rates and response times
+- Use structured logging formats
+- Implement proper log rotation and retention
+ 

@@ -1,0 +1,13 @@
+{
+  "hash": "3f3c20a0",
+  "browserHash": "dfae20b6",
+  "optimized": {
+    "phaser": {
+      "src": "../../node_modules/phaser/dist/phaser.js",
+      "file": "phaser.js",
+      "fileHash": "eda279df",
+      "needsInterop": true
+    }
+  },
+  "chunks": {}
+}

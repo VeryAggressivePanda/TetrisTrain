@@ -1,0 +1,78 @@
+# Web Performance and Optimization Guidelines
+
+## Core Web Vitals
+- Optimize Largest Contentful Paint (LCP) - aim for under 2.5s
+- Minimize Cumulative Layout Shift (CLS) - keep under 0.1
+- Improve First Input Delay (FID) - target under 100ms
+- Monitor and measure performance regularly
+
+## Loading Optimization
+- Use lazy loading for images and non-critical content
+- Implement critical CSS inlining for above-the-fold content
+- Defer non-critical JavaScript execution
+- Optimize font loading with font-display: swap
+- Use preload for critical resources
+
+## Image Optimization
+- Use next-gen formats (WebP, AVIF) with fallbacks
+- Implement responsive images with srcset
+- Optimize SVGs by removing unnecessary metadata
+- Use appropriate compression levels for different image types
+- Implement progressive JPEG for large images
+
+## CSS Best Practices
+- Minimize CSS specificity conflicts
+- Use CSS custom properties for consistent theming
+- Avoid expensive CSS selectors and properties
+- Implement CSS containment where appropriate
+- Use CSS Grid and Flexbox for efficient layouts
+
+## JavaScript Optimization
+- Minimize main thread blocking
+- Use async/defer attributes appropriately
+- Implement code splitting and dynamic imports
+- Avoid large bundle sizes
+- Use efficient DOM manipulation techniques
+
+## Caching Strategies
+- Implement proper HTTP caching headers
+- Use service workers for offline functionality
+- Cache static assets efficiently
+- Implement cache busting for updated assets
+- Use CDN for global asset delivery
+
+## Network Optimization
+- Minimize HTTP requests
+- Use HTTP/2 server push where beneficial
+- Implement resource hints (dns-prefetch, preconnect)
+- Optimize API response sizes
+- Use compression (gzip, brotli) for text assets
+
+## Mobile Performance
+- Optimize for mobile-first performance
+- Implement touch-friendly interactions
+- Minimize paint and composite operations
+- Use passive event listeners where possible
+- Optimize for slower network connections
+
+## Monitoring and Analytics
+- Set up performance monitoring
+- Track Core Web Vitals in production
+- Monitor bundle sizes and dependencies
+- Use lighthouse for regular audits
+- Implement error tracking and reporting
+
+## Asset Delivery
+- Use appropriate cache-control headers
+- Implement immutable caching for versioned assets
+- Optimize asset delivery pipeline
+- Use efficient asset bundling strategies
+- Monitor and optimize third-party scripts
+
+## Database and Backend Optimization
+- Optimize database queries and indexing
+- Implement proper caching layers
+- Use efficient data serialization
+- Minimize server response times
+- Implement proper error handling and fallbacks
+ 
