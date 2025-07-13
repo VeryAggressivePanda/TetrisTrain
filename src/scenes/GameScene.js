@@ -93,8 +93,13 @@ export default class GameScene extends Phaser.Scene {
             }
 
             // Maak pathfinder
-            this.pathfinder = new TrainPathfinder(this);
-            console.log('Pathfinder created');
+            try {
+                this.pathfinder = new TrainPathfinder(this);
+                console.log('Pathfinder created');
+            } catch (error) {
+                console.error('Error creating pathfinder:', error);
+                this.pathfinder = null;
+            }
 
             // Maak debug graphics voor path visualization DAARNA (zodat ze boven shapes zijn)
             this.pathGraphics = this.add.graphics();
@@ -332,7 +337,13 @@ export default class GameScene extends Phaser.Scene {
         this.placedShapes.push(shape);
         
         // Add to pathfinder
-        this.pathfinder.addShape(shape);
+        if (this.pathfinder) {
+            try {
+                this.pathfinder.addShape(shape);
+            } catch (error) {
+                console.error('Error adding shape to pathfinder:', error);
+            }
+        }
         
         // Update score
         this.score += 10;
@@ -475,8 +486,12 @@ export default class GameScene extends Phaser.Scene {
     }
 
     updatePathVisualization() {
-        if (this.pathGraphics) {
-            this.pathfinder.debugDrawPath(this.pathGraphics);
+        if (this.pathGraphics && this.pathfinder) {
+            try {
+                this.pathfinder.debugDrawPath(this.pathGraphics);
+            } catch (error) {
+                console.error('Error updating path visualization:', error);
+            }
         }
     }
 
@@ -487,7 +502,11 @@ export default class GameScene extends Phaser.Scene {
         this.downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
         
         // Mobile touch controls
-        this.createMobileControls();
+        try {
+            this.createMobileControls();
+        } catch (error) {
+            console.error('Error creating mobile controls:', error);
+        }
     }
     
     createMobileControls() {
