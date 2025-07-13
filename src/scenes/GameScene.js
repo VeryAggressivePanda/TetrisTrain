@@ -135,12 +135,16 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createDebugDisplay() {
-        // Maak debug container onderaan het scherm
-        this.debugContainer = this.add.container(10, this.cameras.main.height - 160);
+        // Maak debug container rechts van het spel
+        const gameWidth = this.GRID_WIDTH * this.BLOCK_SIZE;
+        const gameOffsetX = this.GRID_OFFSET_X;
+        const debugX = gameOffsetX + gameWidth + 20; // 20px rechts van het spel
+        
+        this.debugContainer = this.add.container(debugX, 10);
         this.debugContainer.setDepth(1000);
         
         // Debug achtergrond
-        this.debugBg = this.add.rectangle(0, 0, 400, 150, 0x000000, 0.9);
+        this.debugBg = this.add.rectangle(0, 0, 250, 200, 0x000000, 0.9);
         this.debugBg.setStrokeStyle(2, 0xffffff);
         this.debugContainer.add(this.debugBg);
         
@@ -154,9 +158,9 @@ export default class GameScene extends Phaser.Scene {
         
         // Debug tekst
         this.debugText = this.add.text(0, -45, 'Loading...', {
-            fontSize: '12px',
+            fontSize: '11px',
             fill: '#ffffff',
-            wordWrap: { width: 380 }
+            wordWrap: { width: 230 }
         }).setOrigin(0, 0);
         this.debugContainer.add(this.debugText);
         
