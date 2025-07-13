@@ -135,16 +135,15 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createDebugDisplay() {
-        // Maak debug container rechts van het spel
-        const gameWidth = this.GRID_WIDTH * this.BLOCK_SIZE;
-        const gameOffsetX = this.GRID_OFFSET_X;
-        const debugX = gameOffsetX + gameWidth + 20; // 20px rechts van het spel
+        // Maak debug container onder het spelframe
+        const gameBottom = this.GRID_OFFSET_Y + (this.GRID_HEIGHT * this.BLOCK_SIZE);
+        const debugY = gameBottom + 20; // 20px onder het spel
         
-        this.debugContainer = this.add.container(debugX, 10);
+        this.debugContainer = this.add.container(10, debugY);
         this.debugContainer.setDepth(1000);
         
         // Debug achtergrond
-        this.debugBg = this.add.rectangle(0, 0, 250, 200, 0x000000, 0.9);
+        this.debugBg = this.add.rectangle(0, 0, 350, 120, 0x000000, 0.9);
         this.debugBg.setStrokeStyle(2, 0xffffff);
         this.debugContainer.add(this.debugBg);
         
@@ -160,13 +159,13 @@ export default class GameScene extends Phaser.Scene {
         this.debugText = this.add.text(0, -45, 'Loading...', {
             fontSize: '11px',
             fill: '#ffffff',
-            wordWrap: { width: 230 }
+            wordWrap: { width: 330 }
         }).setOrigin(0, 0);
         this.debugContainer.add(this.debugText);
         
         // Copy button
-        this.copyButton = this.add.text(0, 55, '📋 COPY DEBUG', {
-            fontSize: '14px',
+        this.copyButton = this.add.text(0, 35, '📋 COPY DEBUG', {
+            fontSize: '12px',
             fill: '#00ff00',
             fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -727,10 +726,10 @@ export default class GameScene extends Phaser.Scene {
         this.mobileControls = this.add.container(0, 0);
         this.mobileControls.setDepth(300); // Boven alles
         
-        // Bereken posities voor de knoppen (boven de debugger)
+        // Bereken posities voor de knoppen
         const buttonSize = 60;
         const buttonSpacing = 20;
-        const bottomMargin = 180; // Meer ruimte voor debugger
+        const bottomMargin = 30;
         const topMargin = 30;
         const leftMargin = 30;
         
