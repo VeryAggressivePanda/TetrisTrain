@@ -138,10 +138,32 @@ export default class TetrisShape extends Phaser.GameObjects.Container {
     destroyBlocks() {
         this.blocks.forEach(block => {
             if (block && block.destroy) {
-                block.destroy();
+                // Only destroy blocks that are still part of this container
+                if (this.contains(block)) {
+                    block.destroy();
+                }
             }
         });
         this.blocks = [];
+    }
+    
+    // Method to permanently place blocks in the scene
+    placeBlocksInScene(scene, worldX, worldY) {
+        this.blocks.forEach(block => {
+            if (block) {
+                // Remove from container
+                this.remove(block);
+                // Add directly to scene at the correct world position
+                const blockWorldX = worldX + block.x;
+                const blockWorldY = worldY + block.y;
+                block.x = blockWorldX;
+                block.y = blockWorldY;
+                scene.add.existing(block);
+                block.setVisible(true);
+                block.setAlpha(1);
+                block.setDepth(50);
+            }
+        });
     }
     
     createRailPath() {

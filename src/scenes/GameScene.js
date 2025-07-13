@@ -185,8 +185,10 @@ export default class GameScene extends Phaser.Scene {
     
     spawnNewShape() {
         if (this.currentFallingShape) {
-            // Remove old falling shape
-            this.currentFallingShape.destroyBlocks();
+            // Only destroy blocks if the shape is still falling (not placed)
+            if (this.currentFallingShape.isFalling) {
+                this.currentFallingShape.destroyBlocks();
+            }
         }
         
         // Get next shape type (random for now)
@@ -293,21 +295,15 @@ export default class GameScene extends Phaser.Scene {
         shape.x = finalX;
         shape.y = finalY;
         
-        // Ensure shape and blocks remain visible after placement
+        // Create permanent blocks for the placed shape
+        shape.placeBlocksInScene(this, finalX, finalY);
+        
+        // Ensure shape container remains visible but doesn't interfere with blocks
         shape.setVisible(true);
         shape.setAlpha(1);
         shape.setDepth(50);
         
-        // Zorg dat alle blokken zichtbaar blijven
-        shape.blocks.forEach(block => {
-            if (block) {
-                block.setVisible(true);
-                block.setAlpha(1);
-                block.setDepth(50);
-            }
-        });
-        
-        // Update rail path zonder blocks te recreaten
+        // Update rail path
         shape.createRailPath();
         
         // Add to placed shapes
