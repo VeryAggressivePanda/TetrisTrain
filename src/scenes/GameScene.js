@@ -135,34 +135,34 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createDebugDisplay() {
-        // Maak debug container rechtsboven
-        this.debugContainer = this.add.container(this.cameras.main.width - 320, 10);
+        // Maak debug container onderaan het scherm
+        this.debugContainer = this.add.container(10, this.cameras.main.height - 160);
         this.debugContainer.setDepth(1000);
         
-        // Debug achtergrond (kleiner)
-        this.debugBg = this.add.rectangle(0, 0, 310, 150, 0x000000, 0.9);
+        // Debug achtergrond
+        this.debugBg = this.add.rectangle(0, 0, 400, 150, 0x000000, 0.9);
         this.debugBg.setStrokeStyle(2, 0xffffff);
         this.debugContainer.add(this.debugBg);
         
         // Debug titel
-        this.debugTitle = this.add.text(0, -65, 'DEBUG', {
-            fontSize: '14px',
+        this.debugTitle = this.add.text(0, -65, 'DEBUG INFO', {
+            fontSize: '16px',
             fill: '#ffff00',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         this.debugContainer.add(this.debugTitle);
         
-        // Debug tekst (kleiner)
+        // Debug tekst
         this.debugText = this.add.text(0, -45, 'Loading...', {
-            fontSize: '10px',
+            fontSize: '12px',
             fill: '#ffffff',
-            wordWrap: { width: 290 }
+            wordWrap: { width: 380 }
         }).setOrigin(0, 0);
         this.debugContainer.add(this.debugText);
         
-        // Copy button (kleiner)
-        this.copyButton = this.add.text(0, 55, '📋 COPY', {
-            fontSize: '12px',
+        // Copy button
+        this.copyButton = this.add.text(0, 55, '📋 COPY DEBUG', {
+            fontSize: '14px',
             fill: '#00ff00',
             fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -236,23 +236,23 @@ export default class GameScene extends Phaser.Scene {
             isMobile: navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')
         };
         
-        // Build debug text
+        // Build debug text (compact)
         let debugText = '';
         
-        // Game state
-        debugText += '=== GAME STATE ===\n';
-        debugText += `Paused: ${this.debugData.gameState.isPaused}\n`;
-        debugText += `Current Shape: ${this.debugData.gameState.currentShape}\n`;
-        debugText += `Placed Shapes: ${this.debugData.gameState.placedShapes}\n`;
-        debugText += `Score: ${this.debugData.gameState.score}\n`;
-        debugText += `Mobile Controls: ${this.debugData.gameState.mobileControls}\n`;
-        debugText += `Pathfinder: ${this.debugData.gameState.pathfinder}\n\n`;
+        // Game state (compact)
+        debugText += 'GAME: ';
+        debugText += `P:${this.debugData.gameState.isPaused ? 'Y' : 'N'} `;
+        debugText += `S:${this.debugData.gameState.currentShape} `;
+        debugText += `PS:${this.debugData.gameState.placedShapes} `;
+        debugText += `SC:${this.debugData.gameState.score}\n`;
+        debugText += `MC:${this.debugData.gameState.mobileControls} `;
+        debugText += `PF:${this.debugData.gameState.pathfinder}\n`;
         
-        // Mobile detection
-        debugText += '=== MOBILE DETECTION ===\n';
-        debugText += `Touch Events: ${this.debugData.mobileDetection.ontouchstart}\n`;
-        debugText += `Touch Points: ${this.debugData.mobileDetection.maxTouchPoints}\n`;
-        debugText += `Is Mobile: ${this.debugData.mobileDetection.isMobile}\n\n`;
+        // Mobile detection (compact)
+        debugText += 'MOBILE: ';
+        debugText += `TE:${this.debugData.mobileDetection.ontouchstart ? 'Y' : 'N'} `;
+        debugText += `TP:${this.debugData.mobileDetection.maxTouchPoints} `;
+        debugText += `M:${this.debugData.mobileDetection.isMobile ? 'Y' : 'N'}\n`;
         
         // Recent errors (last 3)
         if (this.debugData.errors.length > 0) {
@@ -723,10 +723,10 @@ export default class GameScene extends Phaser.Scene {
         this.mobileControls = this.add.container(0, 0);
         this.mobileControls.setDepth(300); // Boven alles
         
-        // Bereken posities voor de knoppen
+        // Bereken posities voor de knoppen (boven de debugger)
         const buttonSize = 60;
         const buttonSpacing = 20;
-        const bottomMargin = 30;
+        const bottomMargin = 180; // Meer ruimte voor debugger
         const topMargin = 30;
         const leftMargin = 30;
         
