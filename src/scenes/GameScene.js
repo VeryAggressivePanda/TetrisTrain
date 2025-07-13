@@ -135,34 +135,34 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createDebugDisplay() {
-        // Maak debug container
-        this.debugContainer = this.add.container(10, 100);
+        // Maak debug container rechtsboven
+        this.debugContainer = this.add.container(this.cameras.main.width - 320, 10);
         this.debugContainer.setDepth(1000);
         
-        // Debug achtergrond
-        this.debugBg = this.add.rectangle(0, 0, 300, 200, 0x000000, 0.8);
+        // Debug achtergrond (kleiner)
+        this.debugBg = this.add.rectangle(0, 0, 310, 150, 0x000000, 0.9);
         this.debugBg.setStrokeStyle(2, 0xffffff);
         this.debugContainer.add(this.debugBg);
         
         // Debug titel
-        this.debugTitle = this.add.text(0, -80, 'DEBUG INFO', {
-            fontSize: '16px',
+        this.debugTitle = this.add.text(0, -65, 'DEBUG', {
+            fontSize: '14px',
             fill: '#ffff00',
             fontStyle: 'bold'
         }).setOrigin(0.5);
         this.debugContainer.add(this.debugTitle);
         
-        // Debug tekst
-        this.debugText = this.add.text(0, -50, 'Loading...', {
-            fontSize: '12px',
+        // Debug tekst (kleiner)
+        this.debugText = this.add.text(0, -45, 'Loading...', {
+            fontSize: '10px',
             fill: '#ffffff',
-            wordWrap: { width: 280 }
+            wordWrap: { width: 290 }
         }).setOrigin(0, 0);
         this.debugContainer.add(this.debugText);
         
-        // Copy button
-        this.copyButton = this.add.text(0, 70, '📋 COPY DEBUG', {
-            fontSize: '14px',
+        // Copy button (kleiner)
+        this.copyButton = this.add.text(0, 55, '📋 COPY', {
+            fontSize: '12px',
             fill: '#00ff00',
             fontStyle: 'bold'
         }).setOrigin(0.5);
