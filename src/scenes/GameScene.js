@@ -31,6 +31,26 @@ export default class GameScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5);
         
+        // Voeg score toe
+        this.score = 0;
+        this.scoreText = this.add.text(20, 20, 'Score: 0', {
+            fontSize: '18px',
+            fill: '#ffffff',
+            fontStyle: 'bold'
+        });
+        this.scoreText.setDepth(100);
+        
+        // Voeg instructie toe voor mobile
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice) {
+            this.instructionText = this.add.text(this.cameras.main.centerX, 60, 'Gebruik de knoppen onderaan of swipe om te bewegen', {
+                fontSize: '14px',
+                fill: '#ffffff',
+                fontStyle: 'italic'
+            }).setOrigin(0.5);
+            this.instructionText.setDepth(100);
+        }
+        
         // Game afmetingen
         this.BLOCK_SIZE = 30;
         this.GRID_WIDTH = 10;
@@ -65,6 +85,7 @@ export default class GameScene extends Phaser.Scene {
             this.nextShapeType = null;
             this.gameGrid = []; // Track occupied positions
             this.fallSpeed = 1000; // Shape falls every 1000ms
+            this.isPaused = false; // Game pause state
             
             // Initialize game grid
             for (let row = 0; row < this.GRID_HEIGHT; row++) {
@@ -219,6 +240,9 @@ export default class GameScene extends Phaser.Scene {
     }
     
     makeShapeFall() {
+        // Check if game is paused
+        if (this.isPaused) return;
+        
         if (!this.currentFallingShape || !this.currentFallingShape.isFalling) return;
         
         // Try to move shape down
@@ -312,6 +336,10 @@ export default class GameScene extends Phaser.Scene {
         
         // Add to pathfinder
         this.pathfinder.addShape(shape);
+        
+        // Update score
+        this.score += 10;
+        this.scoreText.setText('Score: ' + this.score);
         
         console.log('Placed shape at grid position:', shape.gridX, shape.gridY, 'pixel position:', finalX, finalY);
         console.log('Shape blocks count:', shape.blocks.length, 'visibility:', shape.blocks.map(b => b.visible));
@@ -460,10 +488,312 @@ export default class GameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        
+        // Mobile touch controls
+        this.createMobileControls();
+    }
+    
+    createMobileControls() {
+        // Controleer of we op een touch device zijn
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (!isTouchDevice) {
+            console.log('Not a touch device, skipping mobile controls');
+            return;
+        }
+        
+        console.log('Creating mobile touch controls');
+        
+        // Maak een container voor alle controls
+        this.mobileControls = this.add.container(0, 0);
+        this.mobileControls.setDepth(300); // Boven alles
+        
+        // Bereken posities voor de knoppen
+        const buttonSize = 60;
+        const buttonSpacing = 20;
+        const bottomMargin = 30;
+        const topMargin = 30;
+        const leftMargin = 30;
+        
+        // Posities voor de knoppen
+        const leftButtonX = leftMargin + buttonSize / 2;
+        const rightButtonX = leftMargin + buttonSize * 2 + buttonSpacing + buttonSize / 2;
+        const downButtonX = leftMargin + buttonSize * 4 + buttonSpacing * 2 + buttonSize / 2;
+        const rotateButtonX = this.cameras.main.width - leftMargin - buttonSize / 2;
+        const buttonsY = this.cameras.main.height - bottomMargin - buttonSize / 2;
+        
+        // Maak de knoppen
+        this.createControlButton(leftButtonX, buttonsY, buttonSize, '←', () => {
+            this.moveFallingShape(-1, 0);
+        }, 0x3498db); // Blauw
+        
+        this.createControlButton(rightButtonX, buttonsY, buttonSize, '→', () => {
+            this.moveFallingShape(1, 0);
+        }, 0x3498db); // Blauw
+        
+        this.createControlButton(downButtonX, buttonsY, buttonSize, '↓', () => {
+            this.moveFallingShape(0, 1);
+        }, 0xe74c3c); // Rood
+        
+        this.createControlButton(rotateButtonX, buttonsY, buttonSize, '↻', () => {
+            this.rotateFallingShape();
+        }, 0xf39c12); // Oranje
+        
+        // Voeg een pauze knop toe bovenaan rechts
+        const pauseButtonX = this.cameras.main.width - leftMargin - buttonSize / 2;
+        const pauseButtonY = topMargin + buttonSize / 2;
+        this.createControlButton(pauseButtonX, pauseButtonY, buttonSize, '⏸', () => {
+            this.togglePause();
+        }, 0x95a5a6); // Grijs
+        
+        // Voeg swipe controls toe voor snelle bewegingen
+        this.setupSwipeControls();
+    }
+    
+    createControlButton(x, y, size, text, callback, color = 0x3498db) {
+        // Maak de achtergrond van de knop
+        const buttonBg = this.add.circle(x, y, size / 2, color);
+        buttonBg.setStrokeStyle(3, 0x2c3e50);
+        buttonBg.setAlpha(0.8);
+        
+        // Maak de tekst
+        const buttonText = this.add.text(x, y, text, {
+            fontSize: '24px',
+            fill: '#ffffff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        
+        // Maak de knop interactief
+        buttonBg.setInteractive();
+        buttonText.setInteractive();
+        
+        // Voeg hover effect toe
+        buttonBg.on('pointerover', () => {
+            buttonBg.setAlpha(1);
+            buttonBg.setScale(1.1);
+        });
+        
+        buttonBg.on('pointerout', () => {
+            buttonBg.setAlpha(0.8);
+            buttonBg.setScale(1);
+        });
+        
+        // Voeg click effect toe
+        buttonBg.on('pointerdown', () => {
+            buttonBg.setScale(0.9);
+            if (callback) callback();
+        });
+        
+        buttonBg.on('pointerup', () => {
+            buttonBg.setScale(1.1);
+        });
+        
+        // Zelfde voor tekst
+        buttonText.on('pointerover', () => {
+            buttonBg.setAlpha(1);
+            buttonBg.setScale(1.1);
+        });
+        
+        buttonText.on('pointerout', () => {
+            buttonBg.setAlpha(0.8);
+            buttonBg.setScale(1);
+        });
+        
+        buttonText.on('pointerdown', () => {
+            buttonBg.setScale(0.9);
+            if (callback) callback();
+        });
+        
+        buttonText.on('pointerup', () => {
+            buttonBg.setScale(1.1);
+        });
+        
+        // Voeg toe aan container
+        this.mobileControls.add([buttonBg, buttonText]);
+        
+        return { bg: buttonBg, text: buttonText };
+    }
+    
+    togglePause() {
+        if (!this.isPaused) {
+            // Pauzeer de game
+            this.isPaused = true;
+            this.scene.pause();
+            
+            // Toon pauze overlay
+            this.showPauseOverlay();
+            
+            console.log('Game paused');
+        } else {
+            // Herstart de game
+            this.isPaused = false;
+            this.scene.resume();
+            
+            // Verberg pauze overlay
+            this.hidePauseOverlay();
+            
+            console.log('Game resumed');
+        }
+    }
+    
+    showPauseOverlay() {
+        // Maak een semi-transparante overlay
+        this.pauseOverlay = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY,
+            this.cameras.main.width,
+            this.cameras.main.height,
+            0x000000,
+            0.7
+        );
+        this.pauseOverlay.setDepth(400);
+        
+        // Voeg pauze tekst toe
+        this.pauseText = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 50,
+            'PAUZE',
+            {
+                fontSize: '48px',
+                fill: '#ffffff',
+                fontStyle: 'bold'
+            }
+        ).setOrigin(0.5);
+        this.pauseText.setDepth(401);
+        
+        // Voeg instructie toe
+        this.pauseInstruction = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY + 50,
+            'Tik op het scherm om door te gaan',
+            {
+                fontSize: '18px',
+                fill: '#ffffff'
+            }
+        ).setOrigin(0.5);
+        this.pauseInstruction.setDepth(401);
+        
+        // Voeg tap to resume toe
+        this.pauseOverlay.setInteractive();
+        this.pauseOverlay.on('pointerdown', () => {
+            this.togglePause();
+        });
+    }
+    
+    hidePauseOverlay() {
+        if (this.pauseOverlay) {
+            this.pauseOverlay.destroy();
+            this.pauseOverlay = null;
+        }
+        if (this.pauseText) {
+            this.pauseText.destroy();
+            this.pauseText = null;
+        }
+        if (this.pauseInstruction) {
+            this.pauseInstruction.destroy();
+            this.pauseInstruction = null;
+        }
+    }
+    
+    setupSwipeControls() {
+        // Swipe detection voor snelle bewegingen
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+        const minSwipeDistance = 50;
+        const maxSwipeTime = 300; // milliseconden
+        
+        this.input.on('pointerdown', (pointer) => {
+            // Controleer of we niet op een knop klikken
+            if (this.isPointerOnButton(pointer.x, pointer.y)) {
+                return;
+            }
+            
+            startX = pointer.x;
+            startY = pointer.y;
+            startTime = Date.now();
+        });
+        
+        this.input.on('pointerup', (pointer) => {
+            // Controleer of we niet op een knop klikken
+            if (this.isPointerOnButton(pointer.x, pointer.y)) {
+                return;
+            }
+            
+            const endX = pointer.x;
+            const endY = pointer.y;
+            const endTime = Date.now();
+            
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const deltaTime = endTime - startTime;
+            
+            // Controleer of het een swipe is
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > minSwipeDistance && deltaTime < maxSwipeTime) {
+                // Bepaal swipe richting
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Horizontale swipe
+                    if (deltaX > 0) {
+                        this.moveFallingShape(1, 0); // Rechts
+                    } else {
+                        this.moveFallingShape(-1, 0); // Links
+                    }
+                } else {
+                    // Verticale swipe
+                    if (deltaY > 0) {
+                        this.moveFallingShape(0, 1); // Naar beneden
+                    } else {
+                        this.rotateFallingShape(); // Naar boven = rotatie
+                    }
+                }
+            }
+        });
+    }
+    
+    isPointerOnButton(x, y) {
+        // Controleer of de pointer op een van de knoppen is
+        if (!this.mobileControls) return false;
+        
+        const buttonSize = 60;
+        const bottomMargin = 30;
+        const topMargin = 30;
+        const leftMargin = 30;
+        
+        // Bereken knop posities
+        const leftButtonX = leftMargin + buttonSize / 2;
+        const rightButtonX = leftMargin + buttonSize * 2 + 20 + buttonSize / 2;
+        const downButtonX = leftMargin + buttonSize * 4 + 40 + buttonSize / 2;
+        const rotateButtonX = this.cameras.main.width - leftMargin - buttonSize / 2;
+        const pauseButtonX = this.cameras.main.width - leftMargin - buttonSize / 2;
+        const buttonsY = this.cameras.main.height - bottomMargin - buttonSize / 2;
+        const pauseButtonY = topMargin + buttonSize / 2;
+        
+        // Controleer afstand tot elke knop
+        const buttons = [
+            { x: leftButtonX, y: buttonsY },
+            { x: rightButtonX, y: buttonsY },
+            { x: downButtonX, y: buttonsY },
+            { x: rotateButtonX, y: buttonsY },
+            { x: pauseButtonX, y: pauseButtonY }
+        ];
+        
+        for (const button of buttons) {
+            const distance = Math.sqrt((x - button.x) ** 2 + (y - button.y) ** 2);
+            if (distance <= buttonSize / 2) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     update() {
         try {
+            // Check if game is paused
+            if (this.isPaused) return;
+            
             if (!this.currentFallingShape || !this.currentFallingShape.isFalling) return;
             
             // Handle movement controls
@@ -490,6 +820,9 @@ export default class GameScene extends Phaser.Scene {
     }
     
     moveFallingShape(deltaX, deltaY) {
+        // Check if game is paused
+        if (this.isPaused) return;
+        
         if (!this.currentFallingShape || !this.currentFallingShape.isFalling) return;
         
         if (!this.checkCollision(this.currentFallingShape, deltaX, deltaY)) {
@@ -498,6 +831,9 @@ export default class GameScene extends Phaser.Scene {
     }
     
     rotateFallingShape() {
+        // Check if game is paused
+        if (this.isPaused) return;
+        
         if (!this.currentFallingShape || !this.currentFallingShape.isFalling) return;
         
         // Try rotation
