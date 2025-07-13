@@ -41,15 +41,12 @@ export default class GameScene extends Phaser.Scene {
         this.scoreText.setDepth(100);
         
         // Voeg instructie toe voor mobile
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        if (isTouchDevice) {
-            this.instructionText = this.add.text(this.cameras.main.centerX, 60, 'Gebruik de knoppen onderaan of swipe om te bewegen', {
-                fontSize: '14px',
-                fill: '#ffffff',
-                fontStyle: 'italic'
-            }).setOrigin(0.5);
-            this.instructionText.setDepth(100);
-        }
+        this.instructionText = this.add.text(this.cameras.main.centerX, 60, 'Gebruik de knoppen onderaan of swipe om te bewegen', {
+            fontSize: '14px',
+            fill: '#ffffff',
+            fontStyle: 'italic'
+        }).setOrigin(0.5);
+        this.instructionText.setDepth(100);
         
         // Game afmetingen
         this.BLOCK_SIZE = 30;
@@ -494,10 +491,25 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createMobileControls() {
-        // Controleer of we op een touch device zijn
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        // Verbeterde mobile detectie
+        const isTouchDevice = 'ontouchstart' in window || 
+                             navigator.maxTouchPoints > 0 || 
+                             navigator.userAgent.includes('Mobile') ||
+                             navigator.userAgent.includes('Android') ||
+                             navigator.userAgent.includes('iPhone') ||
+                             navigator.userAgent.includes('iPad');
         
-        if (!isTouchDevice) {
+        console.log('Mobile detection:', {
+            ontouchstart: 'ontouchstart' in window,
+            maxTouchPoints: navigator.maxTouchPoints,
+            userAgent: navigator.userAgent,
+            isTouchDevice: isTouchDevice
+        });
+        
+        // Forceer mobile controls voor testing
+        const forceMobile = true; // Zet dit op false om normale detectie te gebruiken
+        
+        if (!isTouchDevice && !forceMobile) {
             console.log('Not a touch device, skipping mobile controls');
             return;
         }
@@ -551,6 +563,8 @@ export default class GameScene extends Phaser.Scene {
     }
     
     createControlButton(x, y, size, text, callback, color = 0x3498db) {
+        console.log('Creating button:', text, 'at position:', x, y);
+        
         // Maak de achtergrond van de knop
         const buttonBg = this.add.circle(x, y, size / 2, color);
         buttonBg.setStrokeStyle(3, 0x2c3e50);
