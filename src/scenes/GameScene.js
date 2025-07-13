@@ -24,6 +24,9 @@ export default class GameScene extends Phaser.Scene {
     create() {
         console.log('GameScene: create started');
         
+        // Maak debug display
+        this.createDebugDisplay();
+        
         // Toon dat de scene werkt
         this.add.text(this.cameras.main.centerX, 30, 'Tetris Train', {
             fontSize: '24px',
@@ -96,10 +99,10 @@ export default class GameScene extends Phaser.Scene {
             try {
                 this.pathfinder = new TrainPathfinder(this);
                 console.log('Pathfinder created');
-            } catch (error) {
-                console.error('Error creating pathfinder:', error);
-                this.pathfinder = null;
-            }
+                    } catch (error) {
+            this.addDebugError('Error creating pathfinder', error);
+            this.pathfinder = null;
+        }
 
             // Maak debug graphics voor path visualization DAARNA (zodat ze boven shapes zijn)
             this.pathGraphics = this.add.graphics();
@@ -120,7 +123,7 @@ export default class GameScene extends Phaser.Scene {
             this.startTetrisGame();
             
         } catch (error) {
-            console.error('Error in create():', error);
+            this.addDebugError('Error in create()', error);
             this.add.text(this.cameras.main.centerX, 200, 'Error: ' + error.message, {
                 fontSize: '14px',
                 fill: '#ff0000',
@@ -129,6 +132,187 @@ export default class GameScene extends Phaser.Scene {
         }
         
         console.log('GameScene: create finished');
+    }
+    
+    createDebugDisplay() {
+        // Maak debug container
+        this.debugContainer = this.add.container(10, 100);
+        this.debugContainer.setDepth(1000);
+        
+        // Debug achtergrond
+        this.debugBg = this.add.rectangle(0, 0, 300, 200, 0x000000, 0.8);
+        this.debugBg.setStrokeStyle(2, 0xffffff);
+        this.debugContainer.add(this.debugBg);
+        
+        // Debug titel
+        this.debugTitle = this.add.text(0, -80, 'DEBUG INFO', {
+            fontSize: '16px',
+            fill: '#ffff00',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.debugContainer.add(this.debugTitle);
+        
+        // Debug tekst
+        this.debugText = this.add.text(0, -50, 'Loading...', {
+            fontSize: '12px',
+            fill: '#ffffff',
+            wordWrap: { width: 280 }
+        }).setOrigin(0, 0);
+        this.debugContainer.add(this.debugText);
+        
+        // Copy button
+        this.copyButton = this.add.text(0, 70, '📋 COPY DEBUG', {
+            fontSize: '14px',
+            fill: '#00ff00',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.copyButton.setInteractive();
+        this.copyButton.on('pointerdown', () => this.copyDebugInfo());
+        this.debugContainer.add(this.copyButton);
+        
+        // Debug data object
+        this.debugData = {
+            errors: [],
+            warnings: [],
+            info: [],
+            mobileDetection: {},
+            gameState: {}
+        };
+        
+        // Start debug update timer
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.updateDebugDisplay,
+            callbackScope: this,
+            loop: true
+        });
+    }
+    
+    addDebugError(message, error = null) {
+        const timestamp = new Date().toLocaleTimeString();
+        const errorMsg = `[${timestamp}] ERROR: ${message}`;
+        if (error) {
+            errorMsg += ` - ${error.message || error}`;
+        }
+        this.debugData.errors.push(errorMsg);
+        console.error(message, error);
+        this.updateDebugDisplay();
+    }
+    
+    addDebugWarning(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const warningMsg = `[${timestamp}] WARNING: ${message}`;
+        this.debugData.warnings.push(warningMsg);
+        console.warn(message);
+        this.updateDebugDisplay();
+    }
+    
+    addDebugInfo(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const infoMsg = `[${timestamp}] INFO: ${message}`;
+        this.debugData.info.push(infoMsg);
+        console.log(message);
+        this.updateDebugDisplay();
+    }
+    
+    updateDebugDisplay() {
+        if (!this.debugText) return;
+        
+        // Update game state
+        this.debugData.gameState = {
+            isPaused: this.isPaused || false,
+            currentShape: this.currentFallingShape ? this.currentFallingShape.shapeType : 'none',
+            placedShapes: this.placedShapes ? this.placedShapes.length : 0,
+            score: this.score || 0,
+            mobileControls: this.mobileControls ? 'active' : 'inactive',
+            pathfinder: this.pathfinder ? 'active' : 'inactive'
+        };
+        
+        // Update mobile detection
+        this.debugData.mobileDetection = {
+            ontouchstart: 'ontouchstart' in window,
+            maxTouchPoints: navigator.maxTouchPoints,
+            userAgent: navigator.userAgent.substring(0, 50) + '...',
+            isMobile: navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')
+        };
+        
+        // Build debug text
+        let debugText = '';
+        
+        // Game state
+        debugText += '=== GAME STATE ===\n';
+        debugText += `Paused: ${this.debugData.gameState.isPaused}\n`;
+        debugText += `Current Shape: ${this.debugData.gameState.currentShape}\n`;
+        debugText += `Placed Shapes: ${this.debugData.gameState.placedShapes}\n`;
+        debugText += `Score: ${this.debugData.gameState.score}\n`;
+        debugText += `Mobile Controls: ${this.debugData.gameState.mobileControls}\n`;
+        debugText += `Pathfinder: ${this.debugData.gameState.pathfinder}\n\n`;
+        
+        // Mobile detection
+        debugText += '=== MOBILE DETECTION ===\n';
+        debugText += `Touch Events: ${this.debugData.mobileDetection.ontouchstart}\n`;
+        debugText += `Touch Points: ${this.debugData.mobileDetection.maxTouchPoints}\n`;
+        debugText += `Is Mobile: ${this.debugData.mobileDetection.isMobile}\n\n`;
+        
+        // Recent errors (last 3)
+        if (this.debugData.errors.length > 0) {
+            debugText += '=== RECENT ERRORS ===\n';
+            const recentErrors = this.debugData.errors.slice(-3);
+            recentErrors.forEach(error => {
+                debugText += error + '\n';
+            });
+            debugText += '\n';
+        }
+        
+        // Recent warnings (last 2)
+        if (this.debugData.warnings.length > 0) {
+            debugText += '=== RECENT WARNINGS ===\n';
+            const recentWarnings = this.debugData.warnings.slice(-2);
+            recentWarnings.forEach(warning => {
+                debugText += warning + '\n';
+            });
+            debugText += '\n';
+        }
+        
+        // Recent info (last 2)
+        if (this.debugData.info.length > 0) {
+            debugText += '=== RECENT INFO ===\n';
+            const recentInfo = this.debugData.info.slice(-2);
+            recentInfo.forEach(info => {
+                debugText += info + '\n';
+            });
+        }
+        
+        this.debugText.setText(debugText);
+    }
+    
+    copyDebugInfo() {
+        const debugInfo = {
+            timestamp: new Date().toISOString(),
+            gameState: this.debugData.gameState,
+            mobileDetection: this.debugData.mobileDetection,
+            errors: this.debugData.errors,
+            warnings: this.debugData.warnings,
+            info: this.debugData.info
+        };
+        
+        const debugString = JSON.stringify(debugInfo, null, 2);
+        
+        // Copy to clipboard
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(debugString).then(() => {
+                this.copyButton.setText('✅ COPIED!');
+                this.time.delayedCall(2000, () => {
+                    this.copyButton.setText('📋 COPY DEBUG');
+                });
+            }).catch(err => {
+                this.addDebugError('Failed to copy to clipboard', err);
+            });
+        } else {
+            // Fallback: show in alert
+            alert('Debug info copied to console. Check console for details.');
+            console.log('DEBUG INFO:', debugString);
+        }
     }
 
     drawGrid() {
@@ -187,7 +371,7 @@ export default class GameScene extends Phaser.Scene {
             graphics.destroy();
             console.log('Train sprite created (top-down view)');
         } catch (error) {
-            console.error('Error creating train sprite:', error);
+            this.addDebugError('Error creating train sprite', error);
         }
     }
 
@@ -505,7 +689,7 @@ export default class GameScene extends Phaser.Scene {
         try {
             this.createMobileControls();
         } catch (error) {
-            console.error('Error creating mobile controls:', error);
+            this.addDebugError('Error creating mobile controls', error);
         }
     }
     
